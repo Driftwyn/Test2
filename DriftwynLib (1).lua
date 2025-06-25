@@ -69,7 +69,6 @@ function DriftwynLib:CreateWindow(config)
 	MainFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
     MainFrame.BorderSizePixel = 0
     MainFrame.Parent = DriftwynUI
-	MainFrame.ClipsDescendants = false
     Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 6)
 
 	local TopFrame = Instance.new("Frame")
@@ -194,8 +193,6 @@ RightFrame.Size = UDim2.new(0, 8, 0, 344)
     TabButtonsFrame.CanvasSize = UDim2.new(0, 0, 5, 0)
     TabButtonsFrame.ScrollBarThickness = 4
     TabButtonsFrame.Parent = MainFrame
-    LeftFrame.ZIndex = 2
-TabButtonsFrame.ZIndex = 1
     Instance.new("UIListLayout", TabButtonsFrame)
     
     local ContentFrame = Instance.new("Frame")
