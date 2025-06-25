@@ -196,7 +196,7 @@ RightFrame.Size = UDim2.new(0, 8, 0, 344)
     TabButtonsFrame.Parent = MainFrame
     LeftFrame.ZIndex = 2
 TabButtonsFrame.ZIndex = 1
-    Instance.new("UIListLayout", TabButtonsFrame")
+    Instance.new("UIListLayout", TabButtonsFrame)
     
     local ContentFrame = Instance.new("Frame")
     ContentFrame.Name = "ContentFrame"
