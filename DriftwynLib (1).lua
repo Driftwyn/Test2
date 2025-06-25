@@ -1,27 +1,8 @@
--- DriftwynUI Library Module
+-- DriftwynUI Library Module (Tab System Only)
 
 local DriftwynUI = {}
-local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
-
-local configFile = "DriftwynConfig.json"
-local config = {}
-
-local function saveConfig()
-    if writefile then
-        writefile(configFile, HttpService:JSONEncode(config))
-    end
-end
-
-local function loadConfig()
-    if isfile and isfile(configFile) then
-        local data = readfile(configFile)
-        config = HttpService:JSONDecode(data)
-    end
-end
-
-loadConfig()
 
 function DriftwynUI:CreateWindow(titleText)
     local gui = Instance.new("ScreenGui", gethui and gethui() or player:WaitForChild("PlayerGui"))
@@ -50,6 +31,10 @@ function DriftwynUI:CreateWindow(titleText)
     tabBar.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
     Instance.new("UICorner", tabBar).CornerRadius = UDim.new(0, 8)
 
+    local tabListLayout = Instance.new("UIListLayout", tabBar)
+    tabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    tabListLayout.Padding = UDim.new(0, 4)
+
     local contentFrame = Instance.new("Frame", window)
     contentFrame.Position = UDim2.new(0, 130, 0, 45)
     contentFrame.Size = UDim2.new(1, -140, 1, -55)
@@ -57,11 +42,11 @@ function DriftwynUI:CreateWindow(titleText)
     contentFrame.ClipsDescendants = true
     Instance.new("UICorner", contentFrame).CornerRadius = UDim.new(0, 8)
 
-    local function clearContent()
-        for _, child in pairs(contentFrame:GetChildren()) do
-            if not child:IsA("UICorner") then
-                child:Destroy()
-            end
+    local tabSections = {}
+
+    local function showTab(tabName)
+        for name, section in pairs(tabSections) do
+            section.Visible = (name == tabName)
         end
     end
 
@@ -85,75 +70,12 @@ function DriftwynUI:CreateWindow(titleText)
         section.Visible = false
 
         tab.MouseButton1Click:Connect(function()
-            clearContent()
-            section.Visible = true
+            showTab(tabName)
         end)
 
-        local t = {}
+        tabSections[tabName] = section
 
-        function t:AddLabel(text)
-            local lbl = Instance.new("TextLabel", section)
-            lbl.Size = UDim2.new(1, -20, 0, 30)
-            lbl.Position = UDim2.new(0, 10, 0, #section:GetChildren() * 35)
-            lbl.BackgroundTransparency = 1
-            lbl.Text = text
-            lbl.Font = Enum.Font.GothamBold
-            lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-            lbl.TextSize = 16
-            return lbl
-        end
-
-        function t:AddButton(text, callback)
-            local btn = Instance.new("TextButton", section)
-            btn.Size = UDim2.new(0, 200, 0, 30)
-            btn.Position = UDim2.new(0, 10, 0, #section:GetChildren() * 35)
-            btn.Text = text
-            btn.BackgroundColor3 = Color3.fromRGB(100, 0, 130)
-            btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-            btn.Font = Enum.Font.GothamBold
-            btn.TextSize = 14
-            Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-            btn.MouseButton1Click:Connect(callback)
-            return btn
-        end
-
-        function t:AddTextbox(placeholder, callback)
-            local box = Instance.new("TextBox", section)
-            box.Size = UDim2.new(0, 200, 0, 30)
-            box.Position = UDim2.new(0, 10, 0, #section:GetChildren() * 35)
-            box.PlaceholderText = placeholder
-            box.BackgroundColor3 = Color3.fromRGB(90, 0, 130)
-            box.TextColor3 = Color3.fromRGB(255, 255, 255)
-            box.Font = Enum.Font.Gotham
-            box.TextSize = 14
-            Instance.new("UICorner", box).CornerRadius = UDim.new(0, 6)
-            box.FocusLost:Connect(function()
-                callback(box.Text)
-            end)
-            return box
-        end
-
-        function t:AddToggle(labelText, default, callback)
-            local toggle = Instance.new("TextButton", section)
-            toggle.Size = UDim2.new(0, 200, 0, 30)
-            toggle.Position = UDim2.new(0, 10, 0, #section:GetChildren() * 35)
-            toggle.Text = default and labelText .. ": ON" or labelText .. ": OFF"
-            toggle.BackgroundColor3 = Color3.fromRGB(100, 0, 130)
-            toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-            toggle.Font = Enum.Font.GothamBold
-            toggle.TextSize = 14
-            Instance.new("UICorner", toggle).CornerRadius = UDim.new(0, 6)
-            local state = default
-            toggle.MouseButton1Click:Connect(function()
-                state = not state
-                toggle.Text = state and labelText .. ": ON" or labelText .. ": OFF"
-                callback(state)
-            end)
-            return toggle
-        end
-
-        self[tabName] = t
-        return t
+        return section
     end
 
     return self
