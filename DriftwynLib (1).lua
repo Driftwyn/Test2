@@ -1,4 +1,4 @@
--- DriftwynUI Library Module (Tab System Only)
+-- DriftwynUI Library Module (Tab System Only, using cfg.Name)
 
 local DriftwynUI = {}
 local Players = game:GetService("Players")
@@ -43,39 +43,53 @@ function DriftwynUI:CreateWindow(titleText)
     Instance.new("UICorner", contentFrame).CornerRadius = UDim.new(0, 8)
 
     local tabSections = {}
+    local tabButtons = {}
+    local self = {}
 
-    local function showTab(tabName)
-        for name, section in pairs(tabSections) do
-            section.Visible = (name == tabName)
+    function self:SetActiveTab(name)
+        for tabName, section in pairs(tabSections) do
+            section.Visible = (tabName == name)
+            tabButtons[tabName].BackgroundColor3 = (tabName == name) and Color3.fromRGB(100, 0, 140) or Color3.fromRGB(80, 0, 120)
         end
     end
 
-    local self = {}
+    function self:AddTab(cfg)
+        local name = cfg.Name or "Tab"
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(1, -8, 0, 30)
+        btn.Text = name
+        btn.Font = Enum.Font.Gotham
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.TextSize = 14
+        btn.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
+        btn.BorderSizePixel = 0
+        btn.Parent = tabBar
 
-    function self:AddTab(tabName)
-        local tab = Instance.new("TextButton")
-        tab.Size = UDim2.new(1, 0, 0, 40)
-        tab.BackgroundColor3 = Color3.fromRGB(80, 0, 120)
-        tab.Text = tabName
-        tab.TextColor3 = Color3.fromRGB(255, 255, 255)
-        tab.Font = Enum.Font.GothamBold
-        tab.TextSize = 14
-        tab.Parent = tabBar
-        Instance.new("UICorner", tab).CornerRadius = UDim.new(0, 6)
+        local content = Instance.new("ScrollingFrame")
+        content.Name = name .. "_Content"
+        content.Size = UDim2.new(1, 0, 1, 0)
+        content.BackgroundTransparency = 1
+        content.Visible = false
+        content.ScrollBarThickness = 4
+        content.CanvasSize = UDim2.new(0, 0, 5, 0)
+        content.Parent = contentFrame
 
-        local section = Instance.new("Frame")
-        section.Size = UDim2.new(1, 0, 1, 0)
-        section.BackgroundTransparency = 1
-        section.Parent = contentFrame
-        section.Visible = false
+        local layout = Instance.new("UIListLayout", content)
+        layout.Padding = UDim.new(0, 10)
 
-        tab.MouseButton1Click:Connect(function()
-            showTab(tabName)
+        tabSections[name] = content
+        tabButtons[name] = btn
+
+        btn.MouseButton1Click:Connect(function()
+            self:SetActiveTab(name)
         end)
 
-        tabSections[tabName] = section
+        -- Auto-select first tab
+        if #tabBar:GetChildren() == 2 then
+            self:SetActiveTab(name)
+        end
 
-        return section
+        return content
     end
 
     return self
