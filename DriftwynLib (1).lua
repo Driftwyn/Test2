@@ -193,7 +193,16 @@ RightFrame.Size = UDim2.new(0, 8, 0, 344)
     TabButtonsFrame.CanvasSize = UDim2.new(0, 0, 5, 0)
     TabButtonsFrame.ScrollBarThickness = 4
     TabButtonsFrame.Parent = MainFrame
-    Instance.new("UIListLayout", TabButtonsFrame)
+    Instance.new("UIListLayout", TabButtonsFrame")
+
+	local LeftFrame = Instance.new("Frame")
+LeftFrame.Name = "LeftFrame"
+LeftFrame.Parent = MainFrame
+LeftFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+LeftFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+LeftFrame.BorderSizePixel = 0
+LeftFrame.Position = UDim2.new(0, 0, 0.0171428565, 0)
+LeftFrame.Size = UDim2.new(0, 8, 0, 338)
     
     local ContentFrame = Instance.new("Frame")
     ContentFrame.Name = "ContentFrame"
