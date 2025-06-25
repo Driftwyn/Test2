@@ -184,15 +184,6 @@ RightFrame.Size = UDim2.new(0, 8, 0, 344)
     Title.Position = UDim2.new(0.013, 0, 0.017, 0)
     Title.Size = UDim2.new(0.6, 0, 0, 40)
     Title.Parent = MainFrame
-
-local LeftFrame = Instance.new("Frame")
-LeftFrame.Name = "LeftFrame"
-LeftFrame.Parent = MainFrame
-LeftFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-LeftFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
-LeftFrame.BorderSizePixel = 0
-LeftFrame.Position = UDim2.new(0, 0, 0.0171428565, 0)
-LeftFrame.Size = UDim2.new(0, 8, 0, 338)
     
     local TabButtonsFrame = Instance.new("ScrollingFrame")
     TabButtonsFrame.Name = "TabButtons"
@@ -221,6 +212,15 @@ LeftFrame.Size = UDim2.new(0, 8, 0, 338)
     ContentFrame.BorderSizePixel = 0
     ContentFrame.Parent = MainFrame
     Instance.new("UICorner", ContentFrame).CornerRadius = UDim.new(0, 6)
+
+	local LeftFrame = Instance.new("Frame")
+LeftFrame.Name = "LeftFrame"
+LeftFrame.Parent = MainFrame
+LeftFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+LeftFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+LeftFrame.BorderSizePixel = 0
+LeftFrame.Position = UDim2.new(0, 0, 0.0171428565, 0)
+LeftFrame.Size = UDim2.new(0, 8, 0, 338)
     
     -- Switch visible tab
     function self:SetActiveTab(name)
