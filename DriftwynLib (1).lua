@@ -1,7 +1,8 @@
--- DriftwynUI Library Module (Tab System Only, using cfg.Name)
+-- DriftwynUI Library Module (Tab System Only, using cfg.Name + animations + styled tabs)
 
 local DriftwynUI = {}
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
 
 function DriftwynUI:CreateWindow(titleText)
@@ -48,8 +49,11 @@ function DriftwynUI:CreateWindow(titleText)
 
     function self:SetActiveTab(name)
         for tabName, section in pairs(tabSections) do
-            section.Visible = (tabName == name)
-            tabButtons[tabName].BackgroundColor3 = (tabName == name) and Color3.fromRGB(100, 0, 140) or Color3.fromRGB(80, 0, 120)
+            local isActive = (tabName == name)
+            section.Visible = isActive
+            local btn = tabButtons[tabName]
+            local goalColor = isActive and Color3.fromRGB(100, 0, 140) or Color3.fromRGB(45, 45, 60)
+            TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = goalColor}):Play()
         end
     end
 
@@ -58,12 +62,13 @@ function DriftwynUI:CreateWindow(titleText)
         local btn = Instance.new("TextButton")
         btn.Size = UDim2.new(1, -8, 0, 30)
         btn.Text = name
-        btn.Font = Enum.Font.Gotham
+        btn.Font = Enum.Font.GothamBold
         btn.TextColor3 = Color3.fromRGB(255, 255, 255)
         btn.TextSize = 14
         btn.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
         btn.BorderSizePixel = 0
         btn.Parent = tabBar
+        Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
 
         local content = Instance.new("ScrollingFrame")
         content.Name = name .. "_Content"
