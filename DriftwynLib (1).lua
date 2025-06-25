@@ -191,30 +191,54 @@ end
         end
 
         function section:AddDropdown(cfg)
-        local state = false
-            local b = Instance.new("TextButton")
-            b.Size = UDim2.new(1,-20,0,30)
-            b.Text = cfg.Name
-            b.Font = Enum.Font.Gotham
-            b.TextSize = 14
-            b.TextColor3 = Color3.fromRGB(255,255,255)
-            b.BackgroundColor3 = Color3.fromRGB(60,60,85)
-            b.Parent = section
-            Instance.new("UICorner", b)
+    local state = false
+    local selected = nil
 
-            local list = Instance.new("Frame")
-            list.BackgroundColor3 = Color3.fromRGB(70,70,100)
-            list.Size = UDim2.new(1,-20,0,0)
+    local b = Instance.new("TextButton")
+    b.Size = UDim2.new(1, -20, 0, 30)
+    b.Text = cfg.Name or "Dropdown"
+    b.Font = Enum.Font.Gotham
+    b.TextSize = 14
+    b.TextColor3 = Color3.fromRGB(255, 255, 255)
+    b.BackgroundColor3 = Color3.fromRGB(60, 60, 85)
+    b.Parent = section
+    Instance.new("UICorner", b)
+
+    local list = Instance.new("Frame")
+    list.BackgroundColor3 = Color3.fromRGB(70, 70, 100)
+    list.Size = UDim2.new(1, -20, 0, 0)
+    list.Visible = false
+    list.Parent = section
+
+    local layout = Instance.new("UIListLayout", list)
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+    layout.Padding = UDim.new(0, 2)
+
+    b.MouseButton1Click:Connect(function()
+        state = not state
+        list.Visible = state
+        list.Size = UDim2.new(1, -20, 0, #cfg.Options * 30)
+    end)
+
+    for _, opt in ipairs(cfg.Options or {}) do
+        local optBtn = Instance.new("TextButton")
+        optBtn.Size = UDim2.new(1, 0, 0, 30)
+        optBtn.Text = opt
+        optBtn.Font = Enum.Font.Gotham
+        optBtn.TextSize = 14
+        optBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        optBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 110)
+        optBtn.Parent = list
+
+        optBtn.MouseButton1Click:Connect(function()
+            selected = opt
+            b.Text = cfg.Name .. ": " .. opt
             list.Visible = false
-            list.Parent = section
-            local layout = Instance.new("UIListLayout", list)
-
-            b.MouseButton1Click:Connect(function()
-                state = not state
-                list.Visible = state
-                list.Size = UDim2.new(1,-20,0,#cfg.Options*30)
-            end)
-        end
+            state = false
+            if cfg.Callback then cfg.Callback(opt) end
+        end)
+    end
+end
 
         function section:AddMultiDropdown(cfg)
             local selected = {}
