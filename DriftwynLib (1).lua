@@ -96,7 +96,6 @@ function DriftwynUI:CreateWindow(titleText)
             showTab(tabName)
         end
 
-        -- Inject UI elements into section
         function section:AddButton(cfg)
     local b = Instance.new("TextButton")
     b.Size = UDim2.new(1, -20, 0, 30)
