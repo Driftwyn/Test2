@@ -1,135 +1,134 @@
--- DriftwynUI Library Module (UI Updated to Match Full Library Appearance)
+return function()
+    local DriftwynUI = {}
+    local Players = game:GetService("Players")
+    local TweenService = game:GetService("TweenService")
+    local UIS = game:GetService("UserInputService")
+    local player = Players.LocalPlayer
 
-local DriftwynUI = {}
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local UIS = game:GetService("UserInputService")
-local player = Players.LocalPlayer
+    function DriftwynUI:CreateWindow(titleText)
+        local gui = Instance.new("ScreenGui", gethui and gethui() or player:WaitForChild("PlayerGui"))
+        gui.Name = "DriftwynExploitUI"
+        gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-function DriftwynUI:CreateWindow(titleText)
-    local gui = Instance.new("ScreenGui", gethui and gethui() or player:WaitForChild("PlayerGui"))
-    gui.Name = "DriftwynExploitUI"
-    gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        local window = Instance.new("Frame")
+        window.Size = UDim2.new(0, 600, 0, 400)
+        window.Position = UDim2.new(0.5, -300, 0.5, -200)
+        window.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+        window.Active = true
+        window.Draggable = true
+        window.Parent = gui
+        Instance.new("UICorner", window).CornerRadius = UDim.new(0, 12)
 
-    local window = Instance.new("Frame")
-    window.Size = UDim2.new(0, 600, 0, 400)
-    window.Position = UDim2.new(0.5, -300, 0.5, -200)
-    window.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-    window.Active = true
-    window.Draggable = true
-    window.Parent = gui
-    Instance.new("UICorner", window).CornerRadius = UDim.new(0, 12)
+        local title = Instance.new("TextLabel", window)
+        title.Size = UDim2.new(1, 0, 0, 40)
+        title.BackgroundTransparency = 1
+        title.Text = titleText or "Driftwyn UI"
+        title.Font = Enum.Font.GothamBold
+        title.TextSize = 20
+        title.TextColor3 = Color3.fromRGB(255, 255, 255)
 
-    local title = Instance.new("TextLabel", window)
-    title.Size = UDim2.new(1, 0, 0, 40)
-    title.BackgroundTransparency = 1
-    title.Text = titleText or "Driftwyn UI"
-    title.Font = Enum.Font.GothamBold
-    title.TextSize = 20
-    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+        local tabBar = Instance.new("ScrollingFrame", window)
+        tabBar.Size = UDim2.new(0, 120, 1, -40)
+        tabBar.Position = UDim2.new(0, 0, 0, 40)
+        tabBar.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+        tabBar.ScrollBarThickness = 4
+        tabBar.CanvasSize = UDim2.new(0, 0, 5, 0)
+        Instance.new("UICorner", tabBar).CornerRadius = UDim.new(0, 8)
 
-    local tabBar = Instance.new("ScrollingFrame", window)
-    tabBar.Size = UDim2.new(0, 120, 1, -40)
-    tabBar.Position = UDim2.new(0, 0, 0, 40)
-    tabBar.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-    tabBar.ScrollBarThickness = 4
-    tabBar.CanvasSize = UDim2.new(0, 0, 5, 0)
-    Instance.new("UICorner", tabBar).CornerRadius = UDim.new(0, 8)
+        local tabListLayout = Instance.new("UIListLayout", tabBar)
+        tabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        tabListLayout.Padding = UDim.new(0, 4)
 
-    local tabListLayout = Instance.new("UIListLayout", tabBar)
-    tabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    tabListLayout.Padding = UDim.new(0, 4)
+        local contentFrame = Instance.new("Frame", window)
+        contentFrame.Position = UDim2.new(0, 130, 0, 45)
+        contentFrame.Size = UDim2.new(1, -140, 1, -55)
+        contentFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+        contentFrame.ClipsDescendants = true
+        Instance.new("UICorner", contentFrame).CornerRadius = UDim.new(0, 8)
 
-    local contentFrame = Instance.new("Frame", window)
-    contentFrame.Position = UDim2.new(0, 130, 0, 45)
-    contentFrame.Size = UDim2.new(1, -140, 1, -55)
-    contentFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
-    contentFrame.ClipsDescendants = true
-    Instance.new("UICorner", contentFrame).CornerRadius = UDim.new(0, 8)
+        local tabSections = {}
+        local tabButtons = {}
+        local self = {}
 
-    local tabSections = {}
-    local tabButtons = {}
-    local self = {}
-
-    local function showTab(tabName)
-        for name, section in pairs(tabSections) do
-            section.Visible = (name == tabName)
-            local button = tabButtons[name]
-            local goalColor = name == tabName and Color3.fromRGB(70,70,100) or Color3.fromRGB(45,45,60)
-            TweenService:Create(button, TweenInfo.new(0.25), {BackgroundColor3 = goalColor}):Play()
-        end
-    end
-
-    function self:AddTab(cfg)
-        local tabName = cfg.Name or "Tab"
-
-        local tab = Instance.new("TextButton")
-        tab.Size = UDim2.new(1, -8, 0, 30)
-        tab.BackgroundColor3 = Color3.fromRGB(45,45,60)
-        tab.Text = tabName
-        tab.TextColor3 = Color3.fromRGB(255, 255, 255)
-        tab.Font = Enum.Font.Gotham
-        tab.TextSize = 14
-        tab.BorderSizePixel = 0
-        tab.Parent = tabBar
-        Instance.new("UICorner", tab).CornerRadius = UDim.new(0, 6)
-
-        local section = Instance.new("ScrollingFrame")
-        section.Size = UDim2.new(1, 0, 1, 0)
-        section.BackgroundTransparency = 1
-        section.ScrollBarThickness = 4
-        section.CanvasSize = UDim2.new(0, 0, 5, 0)
-        section.Visible = false
-        section.Parent = contentFrame
-
-        local layout = Instance.new("UIListLayout", section)
-        layout.Padding = UDim.new(0, 10)
-
-        tabSections[tabName] = section
-        tabButtons[tabName] = tab
-
-        tab.MouseButton1Click:Connect(function()
-            showTab(tabName)
-        end)
-
-        if not next(tabSections, tabName) then
-            showTab(tabName)
-        end
-
-        function section:AddButton(cfg)
-    local b = Instance.new("TextButton")
-    b.Size = UDim2.new(1, -20, 0, 30)
-    b.Text = cfg.Name or "Button"
-    b.Font = Enum.Font.Gotham
-    b.TextSize = 14
-    b.TextColor3 = Color3.fromRGB(255, 255, 255)
-    b.BackgroundColor3 = Color3.fromRGB(60, 60, 85)
-    b.Parent = section
-    Instance.new("UICorner", b)
-
-    if cfg.Callback then
-        b.MouseButton1Click:Connect(cfg.Callback)
-    end
-end
-
-        function section:AddTextbox(cfg)
-            local tb = Instance.new("TextBox")
-            tb.Size = UDim2.new(1, -20, 0, 30)
-            tb.PlaceholderText = cfg.Name or "Textbox"
-            tb.Font = Enum.Font.Gotham
-            tb.TextSize = 14
-            tb.BackgroundColor3 = Color3.fromRGB(60, 60, 85)
-            tb.TextColor3 = Color3.fromRGB(255, 255, 255)
-            tb.Parent = section
-            Instance.new("UICorner", tb)
-            if cfg.Callback then
-                tb.FocusLost:Connect(function()
-                    cfg.Callback(tb.Text)
-                end)
+        local function showTab(tabName)
+            for name, section in pairs(tabSections) do
+                section.Visible = (name == tabName)
+                local button = tabButtons[name]
+                local goalColor = name == tabName and Color3.fromRGB(70,70,100) or Color3.fromRGB(45,45,60)
+                TweenService:Create(button, TweenInfo.new(0.25), {BackgroundColor3 = goalColor}):Play()
             end
         end
 
-        function section:AddSlider(cfg)
+        function self:AddTab(cfg)
+            local tabName = cfg.Name or "Tab"
+
+            local tab = Instance.new("TextButton")
+            tab.Size = UDim2.new(1, -8, 0, 30)
+            tab.BackgroundColor3 = Color3.fromRGB(45,45,60)
+            tab.Text = tabName
+            tab.TextColor3 = Color3.fromRGB(255, 255, 255)
+            tab.Font = Enum.Font.Gotham
+            tab.TextSize = 14
+            tab.BorderSizePixel = 0
+            tab.Parent = tabBar
+            Instance.new("UICorner", tab).CornerRadius = UDim.new(0, 6)
+
+            local section = Instance.new("ScrollingFrame")
+            section.Size = UDim2.new(1, 0, 1, 0)
+            section.BackgroundTransparency = 1
+            section.ScrollBarThickness = 4
+            section.CanvasSize = UDim2.new(0, 0, 5, 0)
+            section.Visible = false
+            section.Parent = contentFrame
+
+            local layout = Instance.new("UIListLayout", section)
+            layout.Padding = UDim.new(0, 10)
+
+            tabSections[tabName] = section
+            tabButtons[tabName] = tab
+
+            tab.MouseButton1Click:Connect(function()
+                showTab(tabName)
+            end)
+
+            if not next(tabSections, tabName) then
+                showTab(tabName)
+            end
+
+            -- Add UI element methods to section
+            function section:AddButton(cfg)
+                local b = Instance.new("TextButton")
+                b.Size = UDim2.new(1, -20, 0, 30)
+                b.Text = cfg.Name or "Button"
+                b.Font = Enum.Font.Gotham
+                b.TextSize = 14
+                b.TextColor3 = Color3.fromRGB(255, 255, 255)
+                b.BackgroundColor3 = Color3.fromRGB(60, 60, 85)
+                b.Parent = section
+                Instance.new("UICorner", b)
+                if cfg.Callback then
+                    b.MouseButton1Click:Connect(cfg.Callback)
+                end
+            end
+
+            function section:AddTextbox(cfg)
+                local tb = Instance.new("TextBox")
+                tb.Size = UDim2.new(1, -20, 0, 30)
+                tb.PlaceholderText = cfg.Name or "Textbox"
+                tb.Font = Enum.Font.Gotham
+                tb.TextSize = 14
+                tb.BackgroundColor3 = Color3.fromRGB(60, 60, 85)
+                tb.TextColor3 = Color3.fromRGB(255, 255, 255)
+                tb.Parent = section
+                Instance.new("UICorner", tb)
+                if cfg.Callback then
+                    tb.FocusLost:Connect(function()
+                        cfg.Callback(tb.Text)
+                    end)
+                end
+            end
+
+            function section:AddSlider(cfg)
              local label = Instance.new("TextLabel")
             label.Size = UDim2.new(1, -20, 0, 20)
             label.Text = cfg.Name .. ": " .. tostring(cfg.Default or 0)
@@ -305,12 +304,20 @@ end
                         table.insert(selectedList, key)
                     end
                     if cfg.Callback then cfg.Callback(selectedList) end
+        	end
+		end
+
+            local wrapper = {}
+            function wrapper:AddButton(...) return section:AddButton(...) end
+            function wrapper:AddTextbox(...) return section:AddTextbox(...) end
+            function wrapper:AddSlider(...) return section:AddSlider(...) end
+            function wrapper:AddDropdown(...) return section:AddDropdown(...) end
+            function wrapper:AddMultiDropdown(...) return section:AddMultiDropdown(...) end
+            return wrapper
         end
 
-        return section
+        return self
     end
 
-    return self
+    return DriftwynUI
 end
-
-return DriftwynUI
