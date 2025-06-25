@@ -1,153 +1,156 @@
--- DriftwynLib - Full UI Library (With Toggle, Keybind, Textbox, Theme support)
+local FileLogger = require(script.Utils.FileLog)
 
-local Players     = game:GetService("Players")
-local UIS         = game:GetService("UserInputService")
-local HttpService = game:GetService("HttpService")
-local TweenService= game:GetService("TweenService")
-local RunService  = game:GetService("RunService")
-local player      = Players.LocalPlayer
-
--- Preloader UI
-local loader = Instance.new("ScreenGui")
-loader.Name = "DriftwynUILoader"
-loader.ResetOnSpawn = false
-loader.IgnoreGuiInset = true
-loader.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-loader.Parent = player:WaitForChild("PlayerGui")
-
-local bg = Instance.new("Frame")
-bg.Size = UDim2.new(1, 0, 1, 0)
-bg.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-bg.BorderSizePixel = 0
-bg.Parent = loader
-
-local txt = Instance.new("TextLabel")
-txt.AnchorPoint = Vector2.new(0.5, 0.5)
-txt.Position = UDim2.new(0.5, 0, 0.5, 0)
-txt.Size = UDim2.new(0, 240, 0, 50)
-txt.BackgroundTransparency = 1
-txt.TextColor3 = Color3.new(1, 1, 1)
-txt.Font = Enum.Font.GothamBold
-txt.TextSize = 20
-txt.Text = "Driftwyn Hub Loading..."
-txt.Parent = bg
-
-for i = 1, 3 do
-    txt.Text = "Driftwyn Hub Loading" .. string.rep(".", i)
-    wait(0.5)
+-- Environment setup
+for _, Service in pairs({
+	"ContentProvider",
+	"CoreGui",
+	"TweenService",
+	"Players",
+	"RunService",
+	"HttpService",
+	"UserInputService",
+	"TextService",
+	"StarterGui",
+}) do
+	wax.shared[Service] = cloneref(game:GetService(Service))
 end
 
-txt.Text = "Loading Complete!"
-wait(0.6)
-loader:Destroy()
+wax.shared.CobaltVerificationToken = wax.shared.HttpService:GenerateGUID()
+wax.shared.SaveManager = require("Utils/SaveManager")
+wax.shared.Settings = {}
+wax.shared.Hooks = {}
 
-local DriftwynLib = {}
+-- UI setup
+require("Utils/Connect")
+wax.shared.ImageFetcher = require("Utils/ImageFetch")
+wax.shared.LuaEncode = require("Utils/Serializer/LuaEncode")
+wax.shared.Drag = require("Utils/Drag")
+wax.shared.Interface = require("Utils/Interface")
+wax.shared.Icons = require("Utils/Icons")
+wax.shared.Animations = require("Utils/Animations")
+wax.shared.Sonner = require("Utils/Sonner")
+wax.shared.Highlighter = require("Utils/Highlighter")
+wax.shared.Pagination = require("Utils/Pagination")
+wax.shared.CodeGen = require("Utils/CodeGen")
+wax.shared.Resize = require("Utils/Resize")
+wax.shared.Hooking = require("Utils/Hooking")
 
--- UI FRAME SETUP
-function DriftwynLib:CreateWindow(config)
-    local self = {}
-    self.Title = config.Name or "Driftwyn Hub"
-    self.Tabs = {}
+-- Core Player Variables
+if not wax.shared.Players.LocalPlayer then
+	wax.shared.Players.PlayerAdded:Wait()
+end
+wax.shared.LocalPlayer = wax.shared.Players.LocalPlayer
+wax.shared.PlayerScripts = cloneref(wax.shared.LocalPlayer:WaitForChild("PlayerScripts"))
+wax.shared.ExecutorName = string.split(identifyexecutor(), " ")[1]
 
-    local gui = Instance.new("ScreenGui")
-    gui.Name = "DriftwynUI"
-    gui.ResetOnSpawn = false
-    gui.IgnoreGuiInset = true
-    gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    gui.Parent = player:WaitForChild("PlayerGui")
+-- Utilities
+wax.shared.gethui = gethui or function() return wax.shared.CoreGui end
+wax.shared.checkcaller = checkcaller or function() return nil end
+wax.shared.getrawmetatable = getrawmetatable or debug.getmetatable
 
-    local main = Instance.new("Frame")
-    main.Name = "MainFrame"
-    main.Size = UDim2.new(0, 600, 0, 350)
-    main.Position = UDim2.new(0.5, -300, 0.5, -175)
-    main.BackgroundColor3 = Color3.fromRGB(26, 26, 26)
-    main.BorderColor3 = Color3.fromRGB(255, 0, 0)
-    main.BorderSizePixel = 4
-    main.Parent = gui
-
-    local title = Instance.new("TextLabel")
-    title.Text = self.Title
-    title.Size = UDim2.new(0, 150, 0, 30)
-    title.Position = UDim2.new(0.5, -75, 0, 0)
-    title.BackgroundTransparency = 1
-    title.TextColor3 = Color3.new(1, 1, 1)
-    title.Font = Enum.Font.GothamBold
-    title.TextSize = 18
-    title.TextXAlignment = Enum.TextXAlignment.Center
-    title.Parent = main
-
-    local tabBar = Instance.new("Frame")
-    tabBar.Name = "TabBar"
-    tabBar.Size = UDim2.new(0, 120, 1, -30)
-    tabBar.Position = UDim2.new(0, 0, 0, 30)
-    tabBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    tabBar.BorderSizePixel = 0
-    tabBar.Parent = main
-
-    local tabLayout = Instance.new("UIListLayout")
-    tabLayout.Padding = UDim.new(0, 5)
-    tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    tabLayout.Parent = tabBar
-
-    local content = Instance.new("Frame")
-    content.Name = "ContentFrame"
-    content.Size = UDim2.new(1, -120, 1, -30)
-    content.Position = UDim2.new(0, 120, 0, 30)
-    content.BackgroundColor3 = Color3.fromRGB(26, 26, 26)
-    content.BorderSizePixel = 0
-    content.ClipsDescendants = true
-    content.Parent = main
-
-    -- Store references
-    self.Gui = gui
-    self.Main = main
-    self.TabBar = tabBar
-    self.Content = content
-    self.AddTab = function(tabCfg)
-        local tab = {}
-        tab.Name = tabCfg.Name or "Tab"
-
-        local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(1, -10, 0, 30)
-        btn.Text = tab.Name
-        btn.Font = Enum.Font.Gotham
-        btn.TextSize = 14
-        btn.TextColor3 = Color3.new(1, 1, 1)
-        btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-        btn.BorderSizePixel = 0
-        btn.Parent = self.TabBar
-
-        local page = Instance.new("ScrollingFrame")
-        page.Name = tab.Name .. "Page"
-        page.Size = UDim2.new(1, -10, 1, -10)
-        page.Position = UDim2.new(0, 5, 0, 5)
-        page.BackgroundTransparency = 1
-        page.ScrollBarThickness = 6
-        page.CanvasSize = UDim2.new(0, 0, 0, 0)
-        page.Visible = false
-        page.Parent = self.Content
-
-        local layout = Instance.new("UIListLayout")
-        layout.Padding = UDim.new(0, 10)
-        layout.SortOrder = Enum.SortOrder.LayoutOrder
-        layout.Parent = page
-
-        btn.MouseButton1Click:Connect(function()
-            for _, child in pairs(self.Content:GetChildren()) do
-                if child:IsA("ScrollingFrame") then
-                    child.Visible = false
-                end
-            end
-            page.Visible = true
-        end)
-
-        tab.Button = btn
-        tab.Content = page
-
-        return tab
-    end
-
-    return self
+-- restorefunction and newcclosure handling
+wax.shared.restorefunction = function(Function, Silent)
+	local Original = wax.shared.Hooks[Function]
+	if Silent and not Original then return end
+	assert(Original, "Function not hooked")
+	if restorefunction and isfunctionhooked(Function) then
+		restorefunction(Function)
+	else
+		wax.shared.Hooking.HookFunction(Function, Original)
+	end
+	wax.shared.Hooks[Function] = nil
 end
 
-return DriftwynLib
+wax.shared.newcclosure = wax.shared.ExecutorName == "AWP" and function(f)
+	local env = getfenv(f)
+	local x = setmetatable({ __F = f }, { __index = env, __newindex = env })
+	local nf = function(...) return __F(...) end
+	setfenv(nf, x)
+	return newcclosure(nf)
+end or newcclosure
+
+-- Input Helpers
+wax.shared.IsClickInput = function(Input)
+	return Input.UserInputState == Enum.UserInputState.Begin and (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch)
+end
+wax.shared.IsMoveInput = function(Input)
+	return Input.UserInputState == Enum.UserInputState.Change and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch)
+end
+wax.shared.IsMouseOverFrame = function(Frame, Position)
+	local AbsPos, AbsSize = Frame.AbsolutePosition, Frame.AbsoluteSize
+	return Position.X >= AbsPos.X and Position.X <= AbsPos.X + AbsSize.X and Position.Y >= AbsPos.Y and Position.Y <= AbsPos.Y + AbsSize.Y
+end
+
+-- Logging and Debugging
+wax.shared.SetupLoggingConnection = function()
+	if wax.shared.LogConnection then wax.shared.LogConnection:Disconnect() end
+	wax.shared.LogFileName = `Cobalt/Logs/{DateTime.now():ToIsoDate():gsub(":", "_")}.log`
+	local FileLog = FileLogger.new(wax.shared.LogFileName, FileLogger.LOG_LEVELS.INFO, true)
+
+	return function(RemoteInstance, Type, CallOrderInLog)
+		local LogEntry = wax.shared.Logs[Type][RemoteInstance]
+		if not LogEntry then return end
+		local CallDataFromHook = LogEntry.Calls[CallOrderInLog]
+		local success, err = pcall(function()
+			local generatedCode = wax.shared.CodeGen:BuildCallCode(setmetatable({
+				Instance = RemoteInstance,
+				Type = Type,
+			}, { __index = CallDataFromHook }))
+
+			local serializedEventData = wax.shared.LuaEncode({
+				RemoteInstanceInfo = {
+					Name = RemoteInstance.Name,
+					ClassName = RemoteInstance.ClassName,
+					Path = wax.shared.CodeGen.GetFullPath(RemoteInstance, true),
+				},
+				EventType = Type,
+				CallOrderInLog = CallOrderInLog,
+				DataFromHook = CallDataFromHook,
+			}, { Prettify = true, InsertCycles = true, UseInstancePaths = true })
+
+			local logMessage = table.concat({
+				("Instance: %s (%s)"):format(RemoteInstance.Name, RemoteInstance.ClassName),
+				("Path: %s"):format(wax.shared.CodeGen.GetFullPath(RemoteInstance, true)),
+				("Call Order In Log: %s"):format(CallOrderInLog or "N/A"),
+				"-------------------- Event Data --------------------",
+				serializedEventData,
+				"-------------------- Generated Code --------------------",
+				generatedCode,
+			}, "\n\t")
+
+			FileLog:Info(Type .. ":" .. RemoteInstance.Name, logMessage)
+		end)
+
+		if not success then
+			FileLog:Error("Logger", `Failed to log remote communication for {Type}:{RemoteInstance.Name} - {err}`)
+		end
+	end
+end
+
+if wax.shared.SaveManager:GetState("EnableLogging") then
+	local LogConnection = wax.shared.SetupLoggingConnection()
+	wax.shared.LogConnection = wax.shared.Connect(wax.shared.Communicator.Event:Connect(LogConnection))
+end
+
+-- Logs and Final Setup
+wax.shared.Log = require("Utils/Log")
+wax.shared.Logs = { Outgoing = {}, Incoming = {} }
+wax.shared.NewLog = function(Instance, Type, Method, CallingScript)
+	local Log = wax.shared.Log.new(Instance, Type, Method, wax.shared.GetTableLength(wax.shared.Logs[Type]) + 1, CallingScript)
+	wax.shared.Logs[Type][Instance] = Log
+	return Log
+end
+
+-- Final loading
+require("ExecutorSupport")
+require("Bypass")
+require("Window")
+require("Spy/Init")
+
+wax.shared.Communicator = Instance.new("BindableEvent")
+
+-- Delay check for anticheat
+task.wait(1)
+if wax.shared.AnticheatDisabled then
+	wax.shared.Sonner.success(`Cobalt has bypassed {wax.shared.AnticheatName} (anticheat detected)`)
+end
